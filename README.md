@@ -8,50 +8,94 @@ backup and a removal command. Nothing is installed.
 
 ## Run
 
-```bash
-curl -fsSLO https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
-chmod +x dewps.sh
-
-sudo ./dewps.sh debloat --ads --telemetry --ai   # pick groups
-./dewps.sh status
-```
-
-No directory setup needed; the file runs from wherever it lands. Without saving
-it at all:
+Pipe the script straight to bash; nothing is saved. `-s --` forwards the
+arguments after the URL:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --ai
+RAW=https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
+
+# daily profile: keep login/cloud, remove ads + telemetry + AI
+curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --ai
+
+# read-only check
+curl -fsSL "$RAW" | bash -s -- status
 ```
 
-`debloat` without groups disables everything. Re-download to update the script.
-Pin a commit SHA instead of `main` for reproducible code; prefer git?
-`git clone https://github.com/KabosuNeko/DeWPS.git`.
+Pin a commit SHA instead of `main` for reproducible code. Prefer a file?
+`curl -fsSLO "$RAW" && chmod +x dewps.sh`.
 
-After each WPS package update, re-run your `debloat` command (package updates
-restore files, not your `/etc/hosts`).
+After each WPS package update, re-run your profile (package updates restore
+files, not your `/etc/hosts`).
+
+## Profiles
+
+Local autosave/crash recovery is kept in every profile; only login/cloud is
+given up from profile 2 onward.
+
+**0. Inspect** — read-only, changes nothing:
+
+```bash
+curl -fsSL "$RAW" | bash -s -- status
+```
+
+**1. Daily (recommended)** — removes ads, tips, stores, tracking and AI; keeps
+login, cloud, sync:
+
+```bash
+curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --ai
+```
+
+**2. No cloud** — also removes login, WPS Cloud drive/sync, docer and online
+templates; keeps editing, Power Query, local search, local autosave:
+
+```bash
+curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --cloud --ai
+```
+
+**3. Max addon debloat** — all groups, including the embedded browser/web
+panels (`--cef`) and the background daemons:
+
+```bash
+curl -fsSL "$RAW" | sudo bash -s -- debloat
+```
+
+**4. Max + DNS block** — profile 3, then sinkhole 570 telemetry/cloud domains
+(this also makes any remaining online endpoint, including login, unreachable):
+
+```bash
+curl -fsSL "$RAW" | sudo bash -s -- debloat
+curl -fsSL "$RAW" | sudo bash -s -- hosts
+```
+
+Revert at any point:
+
+```bash
+curl -fsSL "$RAW" | sudo bash -s -- restore
+curl -fsSL "$RAW" | sudo bash -s -- hosts-remove
+```
 
 ## Groups
+
+Fine-grained alternative to the profiles:
 
 | Group | Addons | What it covers |
 | :--- | ---: | :--- |
 | `--telemetry` | 20 | Feedback, reporting, config-push and tracking SDKs (`kfeedback`, `kdcsdk`, `kwpskdc`, `kdomainservice`, `kconfigcentersdk`, `kapmsdk`) |
 | `--ads` | 28 | Start page, tips, notifications, message/push SDKs, stores (`kskincenter`, `kmulticatalog`), Prometheus hub panels, VIP promos |
-| `--cloud` | 60 | Cloud drive, docer/KDocs, sharing, account (`qing`, `yunbox`, `kclouddocs`, `knewdocs`, `knewshare`, `kdocer*`, online fonts, OCR/translate/help panels) |
+| `--cloud` | 60 | Cloud drive, docer/KDocs, sharing, account (`qing`, `yunbox`, `kclouddocs`, `knewdocs`, `knewshare`, `kdocer*`), online fonts, OCR/translate/help panels |
 | `--cef` | 6 | Embedded browser/webview (`cef`, `kcef`, `kcefwidgetpool`, `kpromebrowser`, `v8`, web resources) |
 | `--ai` | 44 | AI/Copilot features (writing, formula, PDF AI, spreadsheet AI, translation/OCR AI) |
 | `--daemons` | 4 | Background binaries (`wpscloudsvr`, `wpslingxi`, `wpsd`, `KPacketInstall`) |
 
-Examples:
-
 ```bash
-sudo ./dewps.sh debloat --ads --telemetry --ai   # nothing useful lost
-sudo ./dewps.sh debloat --cloud --cef            # extra disk/RAM savings
-sudo ./dewps.sh debloat                          # all groups
+# combine any groups
+curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --ai
 ```
 
-Local features are never touched: editing/reading Writer/Spreadsheets/
-Presentation/PDF, open/save of `docx`/`xlsx`/`pptx`/`pdf`/`ofd`, printing,
-formulas, charts, Power Query, local search index, barcode/QR tools.
+`debloat` without groups disables everything. Local features are never touched:
+editing/reading Writer/Spreadsheets/Presentation/PDF, open/save of
+`docx`/`xlsx`/`pptx`/`pdf`/`ofd`, printing, formulas, charts, Power Query, local
+search index, barcode/QR tools.
 
 ## Commands
 
@@ -64,17 +108,8 @@ formulas, charts, Power Query, local search index, barcode/QR tools.
 | `status` | user | Per-group active/disabled counts, hosts state, running processes |
 | `version`, `help` | user | Version, usage |
 
-`hosts` is optional and separate: the addon groups already cut the parts that
-phone home; the DNS block also makes login/cloud unreachable.
-
-## Revert
-
-```bash
-sudo ./dewps.sh restore        # addons + binaries
-sudo ./dewps.sh hosts-remove   # /etc/hosts
-```
-
-Backup: `/etc/hosts.dewps-backup`.
+`hosts` is optional and separate. It blocks login/cloud domains too, so use it
+only if you do not need WPS online features.
 
 ## Files touched
 

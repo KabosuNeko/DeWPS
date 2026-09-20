@@ -47,7 +47,9 @@ Error, empty, and recovery behavior:
 
 - Single CLI, `dewps <command>`; `help` lists groups with addon counts and
   examples.
-- Warm path: `sudo dewps debloat --ads --telemetry --ai`, then `dewps status`.
+- Runs from a repo checkout, a downloaded file, or piped
+  (`curl -fsSL <url> | bash -s -- <command>`) without saving anything.
+- Warm path: `debloat --ads --telemetry --ai`, then `status`.
 - Human-readable output; no interactive prompts.
 - Documentation and code in English.
 
