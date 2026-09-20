@@ -29,8 +29,8 @@ Measured on `wps-office-cn` 12.1.2.28080-1:
 
 ## Architecture
 
-- `dewps.sh` — the whole tool: constants, the six group lists
-  (`BLOAT_TELEMETRY` 19, `BLOAT_ADS` 18, `BLOAT_CLOUD` 60, `BLOAT_CEF` 17,
+- `dewps.sh` — the whole tool: constants, the five group lists
+  (`BLOAT_TELEMETRY` 18, `BLOAT_ADS` 18, `BLOAT_CLOUD` 49,
   `BLOAT_AI` 44, `BLOAT_BINARIES` 4), helpers, `cmd_*`, `main`. Command table in
   `README.md`, required behavior in `SPEC.md`.
 - `tests/` — hermetic regression scripts: `test_debloat_cycle.sh`,
@@ -66,7 +66,7 @@ keep the freshest one disabled (never nest); stubs are recognized by the
 `Disabled by DeWPS` marker; `restore` prefers the fresh copy. There is no pacman
 hook by design: re-run `debloat` after a WPS update.
 
-**Group flags.** `cmd_debloat` parses `--telemetry --ads --cloud --cef --ai
+**Group flags.** `cmd_debloat` parses `--telemetry --ads --cloud --ai
 --daemons`; no flags means all groups. Unknown flags abort before any change.
 
 ## Working boundaries

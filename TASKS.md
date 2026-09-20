@@ -18,6 +18,14 @@ Phase 3: Scope cut and docs.
 
 ## Completed
 
+- [x] Remove the shell/browser group after daily-use breakage.
+  - Validation: user test showed WPS hangs whenever `kpluginconfigcenter` is
+    missing; runtime maps proved the shell and `wpscloudsvr` load the whole
+    shell/browser stack (`cef`, `kcef`, `kstartpage`, `kpromewebapp`,
+    `kpluginconfigcenter`, `kccsdk`, `knetwork`, plugin manager, `kapplist`,
+    `kappmgr`). `BLOAT_CEF` was deleted, those addons are excluded from every
+    group and documented as boot-required; `kapplist`/`kappmgr` moved out of
+    the cloud group.
 - [x] Fix the shell misclassification found in daily use.
   - Validation: `kstartpage`, `kpromewebapp*`, `kpromeworkarea`, hub panels and
     `kwebdashboard` moved from `--ads`/`--telemetry` to `--cef`; the daily
@@ -29,7 +37,7 @@ Phase 3: Scope cut and docs.
     `git status --short` clean; tests re-run on the committed tree. Not pushed
     yet.
 - [x] Split debloat into selectable groups.
-  - Validation: `--telemetry` (19), `--ads` (18), `--cloud` (60), `--cef` (17),
+  - Validation: `--telemetry` (18), `--ads` (18), `--cloud` (49),
     `--ai` (44), `--daemons` (4); no flags means all groups; unknown flags abort
     before changes; group selection covered by the debloat cycle test.
 - [x] Cut the tool down to debloat only.

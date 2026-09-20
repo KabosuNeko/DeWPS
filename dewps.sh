@@ -28,7 +28,7 @@ else
     RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' DIM='' RESET=''
 fi
 
-# Addon groups used by `debloat` (select with --telemetry --ads --cloud --cef --ai)
+# Addon groups used by `debloat` (select with --telemetry --ads --cloud --ai)
 BLOAT_TELEMETRY=(
     kfeedback
     kfeedbackcmds
@@ -39,7 +39,6 @@ BLOAT_TELEMETRY=(
     kdomainservice
     konlinefileconfig
     kconfigcentersdk
-    kpluginconfigcenter
     kentrycontrol
     kappconnectivity
     ksoftbus
@@ -72,25 +71,6 @@ BLOAT_ADS=(
     kprivilegerespack
 )
 
-BLOAT_CEF=(
-    cef
-    kcef
-    kcefwidgetpool
-    kpromebrowser
-    v8
-    kfecommonresource
-    kstartpage
-    kpromechuangkit
-    kpromeprocesson
-    kpromeprocessonlocal
-    kprometheusjsapi
-    kpromewebapp
-    kpromewebappruninfo
-    kpromeworkarea
-    kwebintegratedpanel
-    kwebextensionlist
-    kwebdashboard
-)
 
 BLOAT_CLOUD=(
     qing
@@ -102,8 +82,6 @@ BLOAT_CLOUD=(
     wpsbox
     konlinefonts
     kwpscloudmodule
-    yunkitapi
-    knetwork
     knetwork2
     knetworkhook
     kusercenter
@@ -120,11 +98,6 @@ BLOAT_CLOUD=(
     kcloudfiledialog
     kcooperatearea
     kdocerresnetwork
-    kentcloudconfig
-    kextensionmgr
-    kpluginmanager
-    kplugindistributer
-    kpluginrunner
     kqingdlg
     shareplay
     docpermission
@@ -135,10 +108,6 @@ BLOAT_CLOUD=(
     kappesscommon
     kappessdoccommon
     kappessframework
-    kapplist
-    kappmgr
-    kbasewebapi
-    kccsdk
     kjsapipage
     linkeddatatype
     kspacemanager
@@ -571,12 +540,12 @@ cmd_debloat() {
     local groups=()
     local arg group
     if [[ $# -eq 0 ]]; then
-        groups=(telemetry ads cloud cef ai daemons)
+        groups=(telemetry ads cloud ai daemons)
     else
         for arg in "$@"; do
             case "$arg" in
-                --telemetry|--ads|--cloud|--cef|--ai|--daemons) groups+=("${arg#--}") ;;
-                *) log_err "Unknown debloat group: $arg (use --telemetry --ads --cloud --cef --ai --daemons)"; exit 1 ;;
+                --telemetry|--ads|--cloud|--ai|--daemons) groups+=("${arg#--}") ;;
+                *) log_err "Unknown debloat group: $arg (use --telemetry --ads --cloud --ai --daemons)"; exit 1 ;;
             esac
         done
     fi
@@ -590,7 +559,6 @@ cmd_debloat() {
             telemetry) _disable_addons "Telemetry" "${BLOAT_TELEMETRY[@]}" ;;
             ads)       _disable_addons "Ads/Promotions" "${BLOAT_ADS[@]}" ;;
             cloud)     _disable_addons "Cloud" "${BLOAT_CLOUD[@]}" ;;
-            cef)       _disable_addons "Embedded browser" "${BLOAT_CEF[@]}" ;;
             ai)        _disable_addons "AI/Copilot" "${BLOAT_AI[@]}" ;;
             daemons)   _disable_binaries ;;
         esac
@@ -756,12 +724,11 @@ cmd_status() {
 
     echo -e "  ${BOLD}Addons:${RESET}"
     local label arr active disabled
-    for label in Telemetry Ads Cloud CEF AI; do
+    for label in Telemetry Ads Cloud AI; do
         case "$label" in
             Telemetry) arr=("${BLOAT_TELEMETRY[@]}") ;;
             Ads)       arr=("${BLOAT_ADS[@]}") ;;
             Cloud)     arr=("${BLOAT_CLOUD[@]}") ;;
-            CEF)       arr=("${BLOAT_CEF[@]}") ;;
             AI)        arr=("${BLOAT_AI[@]}") ;;
         esac
         read -r active disabled < <(_count_addons "${arr[@]}")
@@ -819,20 +786,19 @@ cmd_help() {
     echo "    dewps version | help"
     echo ""
     echo -e "${BOLD}DEBLOAT GROUPS:${RESET}"
-    echo -e "    ${CYAN}--telemetry${RESET}     Feedback, reporting, config-push SDKs   (19 addons)"
+    echo -e "    ${CYAN}--telemetry${RESET}     Feedback, reporting, config-push SDKs   (18 addons)"
     echo -e "    ${CYAN}--ads${RESET}           Tips, stores, notifications, promos   (18 addons)"
-    echo -e "    ${CYAN}--cloud${RESET}         Cloud drive, docer, share, account      (60 addons)"
-    echo -e "    ${CYAN}--cef${RESET}           Prometheus web shell + browser          (17 addons)"
+    echo -e "    ${CYAN}--cloud${RESET}         Cloud drive, docer, share, account      (49 addons)"
     echo -e "    ${CYAN}--ai${RESET}            AI/Copilot features                     (44 addons)"
     echo -e "    ${CYAN}--daemons${RESET}       Background daemons                      (4 binaries)"
     echo ""
     echo -e "    Without groups, ${CYAN}debloat${RESET} disables all of them."
-    echo -e "    ${YELLOW}--cef can leave a blank window${RESET} unless AppComponentMode=prome_independ"
-    echo -e "    is set in ~/.config/Kingsoft/Office.conf."
+    echo -e "    ${DIM}The web shell, embedded browser and runtime infra are never touched"
+    echo -e "    (WPS needs them to boot).${RESET}"
     echo ""
     echo -e "${BOLD}EXAMPLES:${RESET}"
-    echo "    sudo dewps debloat --ads --telemetry --ai    # nothing useful lost"
-    echo "    sudo dewps debloat --cloud --cef             # extra disk/RAM savings"
+    echo "    sudo dewps debloat --ads --telemetry --ai    # keep login/cloud"
+    echo "    sudo dewps debloat --cloud --ai              # cloud + AI off"
     echo "    sudo dewps debloat                           # everything"
 }
 

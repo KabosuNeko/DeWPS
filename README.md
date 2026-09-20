@@ -33,11 +33,10 @@ templates; keeps editing, Power Query, local search, local autosave:
 curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --cloud --ai
 ```
 
-**3. Max addon debloat** — every group except `--cef` (which would remove the
-web shell, see below):
+**3. Max debloat** — every group:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --telemetry --ads --cloud --ai --daemons
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat
 ```
 
 **4. Max + DNS block** — profile 3, then sinkhole 570 telemetry/cloud domains
@@ -65,10 +64,9 @@ Fine-grained alternative to the profiles:
 
 | Group | Addons | What it covers |
 | :--- | ---: | :--- |
-| `--telemetry` | 19 | Feedback, reporting, config-push and tracking SDKs (`kfeedback`, `kdcsdk`, `kwpskdc`, `kdomainservice`, `kconfigcentersdk`, `kapmsdk`) |
+| `--telemetry` | 18 | Feedback, reporting, config-push and tracking SDKs (`kfeedback`, `kdcsdk`, `kdomainservice`, `kentrycontrol`, `kapmsdk`) |
 | `--ads` | 18 | Tips, notifications, message/push SDKs, stores (`kskincenter`, `kmulticatalog`), VIP promos |
-| `--cloud` | 60 | Cloud drive, docer/KDocs, sharing, account (`qing`, `yunbox`, `kclouddocs`, `knewdocs`, `knewshare`, `kdocer*`), online fonts, OCR/translate/help panels |
-| `--cef` | 17 | Prometheus web shell (`kstartpage`, `kpromewebapp`, `kpromeworkarea`, hub panels) and embedded browser (`cef`, `kcef`, `kpromebrowser`, `v8`) |
+| `--cloud` | 49 | Cloud drive, docer/KDocs, sharing, account (`qing`, `yunbox`, `kclouddocs`, `knewdocs`, `knewshare`, `kdocer*`), online fonts, OCR/translate/help panels |
 | `--ai` | 44 | AI/Copilot features (writing, formula, PDF AI, spreadsheet AI, translation/OCR AI) |
 | `--daemons` | 4 | Background binaries (`wpscloudsvr`, `wpslingxi`, `wpsd`, `KPacketInstall`) |
 
@@ -76,13 +74,12 @@ Fine-grained alternative to the profiles:
 curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --ai
 ```
 
-`debloat` without groups disables everything, including `--cef`.
+`debloat` without groups disables all of them.
 
-**Warning:** the default WPS CN UI is a Prometheus web shell. Disabling `--cef`
-removes that shell; WPS may open a blank window unless you set
-`wpsoffice\Application%20Settings\AppComponentMode=prome_independ` in
-`~/.config/Kingsoft/Office.conf` (native Qt mode). If it goes blank, run
-`restore` and re-enable the shell addons.
+The web shell, embedded browser and runtime infrastructure (`kstartpage`,
+`kpromewebapp`, `cef`, `kpluginconfigcenter`, `knetwork`, `kccsdk`, plugin
+manager...) are **never touched**: WPS CN boots into that shell, and removing it
+leaves a blank window. They are not part of any group.
 
 Local features are never touched: editing/reading Writer/Spreadsheets/Presentation/PDF, open/save of
 `docx`/`xlsx`/`pptx`/`pdf`/`ofd`, printing, formulas, charts, Power Query, local
@@ -92,7 +89,7 @@ search index, barcode/QR tools.
 
 | Command | Privilege | Effect (and what it writes) |
 | :--- | :---: | :--- |
-| `debloat [--telemetry --ads --cloud --cef --ai --daemons]` | sudo | Rename the selected groups to `.disabled` and stub daemons. All groups when no flag is given |
+| `debloat [--telemetry --ads --cloud --ai --daemons]` | sudo | Rename the selected groups to `.disabled` and stub daemons. All groups when no flag is given |
 | `restore` | sudo | Restore addons/binaries to factory state |
 | `hosts` | sudo | Block 570 telemetry/cloud domains in `/etc/hosts` (also blocks login/cloud); backup at `/etc/hosts.dewps-backup` |
 | `hosts-remove` | sudo | Remove the `/etc/hosts` block |

@@ -19,8 +19,8 @@ system package management must keep working.
 
 ## Required behavior
 
-1. `debloat` accepts group flags `--telemetry`, `--ads`, `--cloud`, `--cef`,
-   `--ai`, `--daemons`; with no flags it selects every group. Each addon group
+1. `debloat` accepts group flags `--telemetry`, `--ads`, `--cloud`, `--ai`,
+   `--daemons`; with no flags it selects every group. Each addon group
    is renamed to `<name>.disabled`; `--daemons` replaces the four background
    binaries with `exit 0` stubs, keeping originals at `<binary>.disabled`.
 2. Unknown group flags fail with a usage message before changing anything.
@@ -60,11 +60,12 @@ Error, empty, and recovery behavior:
 - State lives in the filesystem: `.disabled` renames, the `Disabled by DeWPS`
   stub marker, `/etc/hosts` markers, backup file. Nothing is written to the home
   directory.
-- Groups: `BLOAT_TELEMETRY` (19), `BLOAT_ADS` (18), `BLOAT_CLOUD` (60),
-  `BLOAT_CEF` (17), `BLOAT_AI` (44), `BLOAT_BINARIES` (4).
-- `--cef` covers the Prometheus web shell and embedded browser; disabling it can
-  leave a blank window unless native mode is configured. `--cef` is not part of
-  the safe max profile.
+- Groups: `BLOAT_TELEMETRY` (18), `BLOAT_ADS` (18), `BLOAT_CLOUD` (49),
+  `BLOAT_AI` (44), `BLOAT_BINARIES` (4). The web shell, embedded browser and
+  runtime infrastructure (`kstartpage`, `kpromewebapp`, `cef`, `kcef`,
+  `kpluginconfigcenter`, `kccsdk`, `knetwork`, `kapplist`, `kappmgr`, plugin
+  manager...) are deliberately excluded from every group: WPS CN boots into that
+  shell, and removing it leaves a blank window or breaks service startup.
 - External interfaces: `/usr/lib/office6`, `/etc/hosts`, `pgrep`/`ps`, `pacman`.
 - Privilege flow: `sudo` for system paths; nothing else is touched.
 
