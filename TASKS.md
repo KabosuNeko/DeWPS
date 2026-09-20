@@ -33,9 +33,9 @@ Phase 3: Scope cut and docs.
     `--cef` requires native mode; group selection test keeps a shell addon when
     only `--ads --ai` are selected.
 - [x] Commit the project state.
-  - Validation: three commits on `main` (`feat` tool, `test` suite, `docs`);
-    `git status --short` clean; tests re-run on the committed tree. Not pushed
-    yet.
+  - Validation: four commits on `main` (`feat` tool, `test` suite, `docs`);
+    `git status --short` clean; tests re-run on the committed tree; pushed to
+    `origin/main` and the raw `curl` URL verified against the local hash.
 - [x] Split debloat into selectable groups.
   - Validation: `--telemetry` (18), `--ads` (18), `--cloud` (49),
     `--ai` (44), `--daemons` (4); no flags means all groups; unknown flags abort
