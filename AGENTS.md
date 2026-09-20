@@ -92,7 +92,8 @@ hook by design: re-run `debloat` after a WPS update.
 ## Commands
 
 ```bash
-# No build step; download or clone only.
+# No build step: run from a downloaded file, a clone, or piped:
+#   curl -fsSL <url> | bash -s -- <command>
 
 # Static analysis
 bash -n dewps.sh

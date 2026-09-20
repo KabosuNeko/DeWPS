@@ -9,7 +9,6 @@ backup and a removal command. Nothing is installed.
 ## Run
 
 ```bash
-mkdir -p ~/.local/share/dewps && cd ~/.local/share/dewps
 curl -fsSLO https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
 chmod +x dewps.sh
 
@@ -17,8 +16,16 @@ sudo ./dewps.sh debloat --ads --telemetry --ai   # pick groups
 ./dewps.sh status
 ```
 
-`debloat` without groups disables everything. Pin a commit SHA instead of `main`
-for reproducible code; prefer git? `git clone https://github.com/KabosuNeko/DeWPS.git`.
+No directory setup needed; the file runs from wherever it lands. Without saving
+it at all:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --ai
+```
+
+`debloat` without groups disables everything. Re-download to update the script.
+Pin a commit SHA instead of `main` for reproducible code; prefer git?
+`git clone https://github.com/KabosuNeko/DeWPS.git`.
 
 After each WPS package update, re-run your `debloat` command (package updates
 restore files, not your `/etc/hosts`).
