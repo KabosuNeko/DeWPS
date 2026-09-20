@@ -100,6 +100,11 @@ search index, barcode/QR tools.
 | `status` | user | Per-group active/disabled counts, hosts state, running processes |
 | `version`, `help` | user | Version, usage |
 
+The DNS block also prevents hangs: when a WPS promo/CDN endpoint is unreachable,
+the web shell can wait forever on the request; `0.0.0.0` makes it fail instantly.
+Remove the block with `hosts-remove` if you need WPS online features and the
+endpoints are reachable.
+
 ## Limitations
 
 - `/etc/hosts` is bypassed by DoH, proxies, or hardcoded IPs.
