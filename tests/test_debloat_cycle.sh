@@ -50,7 +50,6 @@ check "fresh: kccsdk renamed"       yes "$( [[ -d $ADDONS_DIR/kccsdk.disabled ]]
 check "fresh: kdocerresource renamed" yes "$( [[ -d $ADDONS_DIR/kdocerresource.disabled ]] && echo yes || echo no )"
 check "fresh: wpsd stubbed"         yes "$(grep -q 'Disabled by DeWPS' "$OFFICE_DIR/wpsd" && echo yes || echo no)"
 check "fresh: original preserved"   real-binary "$(cat "$OFFICE_DIR/wpsd.disabled")"
-check "fresh: changelog written"    yes "$( [[ -f $WORK/fakehome/.config/dewps/changes.log ]] && echo yes || echo no )"
 
 # --- run 2: idempotent ---
 cmd_debloat >/dev/null
@@ -76,7 +75,6 @@ check "restore-after-update: fresh addon kept"   freshest "$(cat "$ADDONS_DIR/ce
 check "restore-after-update: no nested junk"     no "$( [[ -e $ADDONS_DIR/cef/cef.disabled ]] && echo yes || echo no )"
 check "restore-after-update: fresh binary kept"  freshest-binary "$(cat "$OFFICE_DIR/wpsd")"
 check "restore-after-update: stale copy removed" no "$( [[ -e $OFFICE_DIR/wpsd.disabled ]] && echo yes || echo no )"
-check "restore: changelog archived"              yes "$( [[ -f $WORK/fakehome/.config/dewps/changes.log.bak ]] && echo yes || echo no )"
 
 # --- group selection ---
 rm -rf "$ADDONS_DIR"

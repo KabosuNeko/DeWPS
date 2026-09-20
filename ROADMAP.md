@@ -76,13 +76,11 @@ Only debloat remains: no privacy hardening, no sandbox, no installers.
 - `debloat` now takes group flags so users choose what to remove.
 - `hosts` kept as the optional DNS-block companion.
 - README rewritten; SPEC/ROADMAP/TASKS/AGENTS synced.
-- Repository backed up before the cuts
-  (`~/.local/share/dewps/dewps-backup-2026-09-20.tar.gz`).
 
 ### Dependencies and risks
 
-- Removed features are not in git history yet; the tarball backup is the only
-  copy until the work is committed.
+- Removed features were deleted before they reached a public release; the
+  decisions are recorded here instead of in git history.
 
 ### Exit criteria
 

@@ -4,7 +4,8 @@ Debloater for WPS Office CN (`wps-office-cn`) on Arch Linux: disable the addons
 you do not need (telemetry, ads, cloud, embedded browser, AI) and optionally
 block telemetry domains. Everything is reversible: addons are renamed to
 `.disabled`, daemons are replaced with `exit 0` stubs, and `/etc/hosts` has a
-backup and a removal command. Nothing is installed.
+backup and a removal command. Nothing is installed and nothing is written
+outside `/usr/lib/office6` and `/etc/hosts`.
 
 ## Run
 
@@ -79,7 +80,6 @@ Fine-grained alternative to the profiles:
 | `--daemons` | 4 | Background binaries (`wpscloudsvr`, `wpslingxi`, `wpsd`, `KPacketInstall`) |
 
 ```bash
-# combine any groups
 curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --ai
 ```
 
@@ -92,7 +92,7 @@ search index, barcode/QR tools.
 
 | Command | Privilege | Effect (and what it writes) |
 | :--- | :---: | :--- |
-| `debloat [--telemetry --ads --cloud --cef --ai --daemons]` | sudo | Rename the selected groups to `.disabled`, stub daemons; audit log in `~/.config/dewps`. All groups when no flag is given |
+| `debloat [--telemetry --ads --cloud --cef --ai --daemons]` | sudo | Rename the selected groups to `.disabled` and stub daemons. All groups when no flag is given |
 | `restore` | sudo | Restore addons/binaries to factory state |
 | `hosts` | sudo | Block 570 telemetry/cloud domains in `/etc/hosts` (also blocks login/cloud); backup at `/etc/hosts.dewps-backup` |
 | `hosts-remove` | sudo | Remove the `/etc/hosts` block |
@@ -102,7 +102,6 @@ search index, barcode/QR tools.
 
 ## Limitations
 
-- Package updates restore WPS files; re-run `debloat` afterwards.
 - `/etc/hosts` is bypassed by DoH, proxies, or hardcoded IPs.
 - Group classification is static; vendor renames require updates.
 - This is not a privacy/security sandbox. If you need process isolation or

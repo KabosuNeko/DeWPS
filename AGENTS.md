@@ -37,8 +37,8 @@ Measured on `wps-office-cn` 12.1.2.28080-1:
   `test_docs_links.sh`.
 - Docs: `SPEC.md`, `ROADMAP.md`, `TASKS.md`, `README.md`.
 - State lives in the filesystem: `.disabled` renames, `Disabled by DeWPS` stub
-  marker, `/etc/hosts` markers, `/etc/hosts.dewps-backup`. The audit log
-  `~/.config/dewps/changes.log` is not used for rollback.
+  marker, `/etc/hosts` markers, `/etc/hosts.dewps-backup`. Nothing is written to
+  the home directory.
 - No installed artifacts: nothing in `/usr/local/bin`, no pacman hook, no
   desktop overrides, no changes to `Office.conf`, tracking databases, or the
   device ID.
@@ -68,9 +68,6 @@ hook by design: re-run `debloat` after a WPS update.
 
 **Group flags.** `cmd_debloat` parses `--telemetry --ads --cloud --cef --ai
 --daemons`; no flags means all groups. Unknown flags abort before any change.
-
-**Sudo and target user.** The audit log resolves the real user through
-`get_target_user` / `get_target_home`, never `/root`.
 
 ## Working boundaries
 

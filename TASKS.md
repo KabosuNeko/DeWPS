@@ -10,7 +10,7 @@ Phase 3: Scope cut and docs.
     wanted.
   - Acceptance criteria: only the selected groups show as disabled; local
     features (Power Query, search, editing) still work; nothing written outside
-    `/usr/lib/office6` and `~/.config/dewps`.
+    `/usr/lib/office6`.
   - Automated validation: `bash -n`, `shellcheck -S style`, `tests/*.sh`.
   - Manual validation: inspect `status`, launch WPS, open/save a document.
   - Dependencies or blockers: requires explicit approval for system-changing
@@ -29,8 +29,8 @@ Phase 3: Scope cut and docs.
 - [x] Cut the tool down to debloat only.
   - Validation: removed `privacy`, `clean`, `harden`, `sandbox-*`, `hook-*`,
     `hide-hub`/`show-hub`, `scan`, and the selective command layer; `hosts` kept
-    as the optional DNS block; script is ~890 lines; full repository backed up
-    to `~/.local/share/dewps/dewps-backup-2026-09-20.tar.gz` before the cuts.
+    as the optional DNS block; script is ~860 lines; a pre-cut backup was taken
+    and later deleted on request.
 - [x] Leave local-only daemons untouched by default.
   - Validation: `BLOAT_BINARIES` contains only cloud/AI/installer daemons
     (`wpsquery` = Power Query and `EverythingDaemon` = search index removed
@@ -43,7 +43,7 @@ Phase 3: Scope cut and docs.
   - Validation: simulated pacman upgrade keeps the freshest copy, never nests
     directories, and `restore` prefers the fresh copy.
 - [x] Add hermetic tests.
-  - Validation: `tests/test_debloat_cycle.sh` (27 checks) and
+  - Validation: `tests/test_debloat_cycle.sh` (25 checks) and
     `tests/test_docs_links.sh` (0 broken links) pass in isolated temp
     directories.
 - [x] Rewrite project docs per the `project-docs` template.

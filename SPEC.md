@@ -58,13 +58,12 @@ Error, empty, and recovery behavior:
 - One bash script, `dewps.sh`: constants, group lists, helpers, `cmd_*`
   functions, `main` dispatch. Regression tests in `tests/`.
 - State lives in the filesystem: `.disabled` renames, the `Disabled by DeWPS`
-  stub marker, `/etc/hosts` markers, backup file. The audit log
-  `~/.config/dewps/changes.log` is not used for rollback.
+  stub marker, `/etc/hosts` markers, backup file. Nothing is written to the home
+  directory.
 - Groups: `BLOAT_TELEMETRY` (20), `BLOAT_ADS` (28), `BLOAT_CLOUD` (60),
   `BLOAT_CEF` (6), `BLOAT_AI` (44), `BLOAT_BINARIES` (4).
 - External interfaces: `/usr/lib/office6`, `/etc/hosts`, `pgrep`/`ps`, `pacman`.
-- Privilege flow: `sudo` for system paths; `get_target_user` / `get_target_home`
-  resolve the real user for the audit log.
+- Privilege flow: `sudo` for system paths; nothing else is touched.
 
 ## Security and privacy
 

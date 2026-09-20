@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
-# DeWPS — WPS Office CN Debloater & Privacy Hardener
+# DeWPS — WPS Office CN Debloater
 # https://github.com/KabosuNeko/DeWPS
 #
-# All changes are reversible: addons are renamed to .disabled, binaries are
-# replaced with no-op stubs, and every change is logged to
-# ~/.config/dewps/changes.log. Run 'dewps help' for the command list.
+# All changes are reversible: addons are renamed to .disabled and binaries are
+# replaced with no-op stubs. Run 'dewps help' for the command list.
 
 set -euo pipefail
 
@@ -451,27 +450,8 @@ header() {
     echo -e "\n${BOLD}${CYAN}═══ $* ═══${RESET}\n"
 }
 
-get_target_user() {
-    echo "${SUDO_USER:-$USER}"
-}
 
-get_target_home() {
-    local u
-    u=$(get_target_user)
-    getent passwd "$u" | cut -d: -f6
-}
 
-ensure_config_dir() {
-    local dir log user
-    dir="$(get_target_home)/.config/dewps"
-    log="${dir}/changes.log"
-    mkdir -p "$dir"
-    [[ -e "$log" ]] || : > "$log"
-    if [[ $EUID -eq 0 ]]; then
-        user=$(get_target_user)
-        chown "$user:$user" "$dir" "$log" 2>/dev/null || true
-    fi
-}
 
 check_wps_installed() {
     if [[ ! -d "$OFFICE_DIR" ]]; then
@@ -487,12 +467,6 @@ need_sudo() {
     fi
 }
 
-record_change() {
-    # $1 = action (disable_addon, disable_binary)
-    # $2 = path
-    printf '%(%Y-%m-%dT%H:%M:%S%z)T|%s|%s\n' -1 "$1" "$2" \
-        >> "$(get_target_home)/.config/dewps/changes.log"
-}
 
 _count_addons() {
     # addon names as args -> "active disabled"
@@ -551,7 +525,6 @@ _disable_addons() {
                 rm -rf "$disabled_path"
             fi
             mv "$addon_path" "$disabled_path"
-            record_change "disable_addon" "$addon"
             disabled=$((disabled + 1))
         else
             skipped=$((skipped + 1))
@@ -588,7 +561,6 @@ _disable_binaries() {
 exit 0
 STUB
         chmod +x "$bin_path"
-        record_change "disable_binary" "$binary"
         disabled=$((disabled + 1))
     done
 
@@ -611,7 +583,6 @@ cmd_debloat() {
 
     need_sudo debloat
     check_wps_installed
-    ensure_config_dir
     header "DeWPS Debloat"
 
     for group in "${groups[@]}"; do
@@ -669,12 +640,6 @@ cmd_restore() {
             restored=$((restored + 1))
         fi
     done
-
-    local changes_log
-    changes_log="$(get_target_home)/.config/dewps/changes.log"
-    if [[ -f "$changes_log" ]]; then
-        mv "$changes_log" "${changes_log}.bak"
-    fi
 
     echo ""
     log_ok "Restored ${restored} components"
