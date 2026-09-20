@@ -9,29 +9,15 @@ backup and a removal command. Nothing is installed.
 ## Run
 
 Pipe the script straight to bash; nothing is saved. `-s --` forwards the
-arguments after the URL:
+arguments after the URL. Set `RAW` once per shell, then any profile below is a
+copy-paste:
 
 ```bash
 RAW=https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
-
-# daily profile: keep login/cloud, remove ads + telemetry + AI
-curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --ai
-
-# read-only check
-curl -fsSL "$RAW" | bash -s -- status
 ```
 
-Pin a commit SHA instead of `main` for reproducible code. Prefer a file?
-`curl -fsSLO "$RAW" && chmod +x dewps.sh`.
-
-After each WPS package update, re-run your profile (package updates restore
-files, not your `/etc/hosts`).
-
-## Profiles
-
-Set `RAW` once per shell (see [Run](#run)); every command below then works as a
-copy-paste. Local autosave/crash recovery is kept in every profile; only
-login/cloud is given up from profile 2 onward.
+Local autosave/crash recovery is kept in every profile; only login/cloud is
+given up from profile 2 onward.
 
 **0. Inspect** — read-only, changes nothing:
 
@@ -74,6 +60,10 @@ Revert at any point:
 curl -fsSL "$RAW" | sudo bash -s -- restore
 curl -fsSL "$RAW" | sudo bash -s -- hosts-remove
 ```
+
+Pin a commit SHA instead of `main` for reproducible code. Prefer a file?
+`curl -fsSLO "$RAW" && chmod +x dewps.sh`. After each WPS package update,
+re-run your profile (package updates restore files, not your `/etc/hosts`).
 
 ## Groups
 
