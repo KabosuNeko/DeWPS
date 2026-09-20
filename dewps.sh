@@ -72,57 +72,6 @@ BLOAT_ADS=(
 )
 
 
-BLOAT_CLOUD=(
-    qing
-    yunbox
-    khyperion
-    officespace
-    knewshare
-    knewdocs
-    wpsbox
-    konlinefonts
-    kwpscloudmodule
-    knetwork2
-    knetworkhook
-    kusercenter
-    kpromeaccountpanel
-    kwebclouddrivesetting
-    kwebdoccloudsync
-    kwebdocscontrol
-    kwebwpsyunboxdoccloudsync
-    kwebadaptersyncfolder
-    kwebpromehelp
-    kwpscloudskin
-    kcloudadapter
-    kclouddocs
-    kcloudfiledialog
-    kcooperatearea
-    kdocerresnetwork
-    kqingdlg
-    shareplay
-    docpermission
-    wpsassistanttool
-    kkdcconv
-    kappentryobject
-    kappessbuiltinjsapi
-    kappesscommon
-    kappessdoccommon
-    kappessframework
-    kjsapipage
-    linkeddatatype
-    kspacemanager
-    kwebdoctranslate
-    khelp
-    kwebocrtool
-    kdocerbase
-    kdocercore
-    kdocercorelite
-    kdocerjsapi20
-    kdocerjsapilite20
-    kdocerpage
-    kdocerresapply
-    kdocerresource
-)
 
 # AI/Copilot features — safe to remove
 BLOAT_AI=(
@@ -177,12 +126,6 @@ BLOAT_AI=(
 # Background binaries to disable. Only cloud/AI/installer daemons belong here;
 # local-only services (wpsquery = Power Query engine, EverythingDaemon = search
 # index) are intentionally left untouched.
-BLOAT_BINARIES=(
-    wpscloudsvr
-    wpslingxi
-    wpsd
-    KPacketInstall
-)
 
 # Telemetry domains to block
 TELEMETRY_DOMAINS=(
@@ -451,30 +394,7 @@ _count_addons() {
     printf '%s %s\n' "$active" "$disabled"
 }
 
-_count_binaries() {
-    local binary active=0 disabled=0
 
-    for binary in "${BLOAT_BINARIES[@]}"; do
-        if [[ -f "${OFFICE_DIR}/${binary}.disabled" ]]; then
-            disabled=$((disabled + 1))
-        elif [[ -f "${OFFICE_DIR}/${binary}" ]]; then
-            active=$((active + 1))
-        fi
-    done
-    printf '%s %s\n' "$active" "$disabled"
-}
-
-_kill_matching() {
-    # $1 = pgrep -f pattern, $2 = label; increments $killed
-    local pids pid
-    pids=$(pgrep -f "$1" 2>/dev/null) || return 0
-    while IFS= read -r pid; do
-        if kill "$pid" 2>/dev/null; then
-            log_ok "Killed $2 (PID ${pid})"
-            killed=$((killed + 1))
-        fi
-    done <<< "$pids"
-}
 
 _disable_addons() {
     # $1 = label; remaining args = addon names
@@ -503,48 +423,16 @@ _disable_addons() {
     log_ok "${label}: disabled ${disabled} addons (${skipped} already disabled/missing)"
 }
 
-_disable_binaries() {
-    local disabled=0
-    local binary
-
-    for binary in "${BLOAT_BINARIES[@]}"; do
-        local bin_path="${OFFICE_DIR}/${binary}"
-        local disabled_path="${bin_path}.disabled"
-
-        [[ -f "$bin_path" ]] || continue
-
-        if grep -q "Disabled by DeWPS" "$bin_path" 2>/dev/null; then
-            continue
-        fi
-
-        # A pacman update reinstalls the real binary while a stale .disabled
-        # copy may still exist. Keep the fresh copy as the disabled one.
-        if [[ -f "$disabled_path" ]]; then
-            rm -f "$disabled_path"
-        fi
-
-        mv "$bin_path" "$disabled_path"
-        cat > "$bin_path" << 'STUB'
-#!/bin/sh
-# Disabled by DeWPS — original at ${0}.disabled
-exit 0
-STUB
-        chmod +x "$bin_path"
-        disabled=$((disabled + 1))
-    done
-
-    log_ok "Binaries: disabled ${disabled} background services"
-}
 
 cmd_debloat() {
     local groups=()
     local arg group
     if [[ $# -eq 0 ]]; then
-        groups=(telemetry ads cloud ai daemons)
+        groups=(telemetry ads ai)
     else
         for arg in "$@"; do
             case "$arg" in
-                --telemetry|--ads|--cloud|--ai|--daemons) groups+=("${arg#--}") ;;
+                --telemetry|--ads|--ai) groups+=("${arg#--}") ;;
                 *) log_err "Unknown debloat group: $arg (use --telemetry --ads --cloud --ai --daemons)"; exit 1 ;;
             esac
         done
@@ -558,9 +446,7 @@ cmd_debloat() {
         case "$group" in
             telemetry) _disable_addons "Telemetry" "${BLOAT_TELEMETRY[@]}" ;;
             ads)       _disable_addons "Ads/Promotions" "${BLOAT_ADS[@]}" ;;
-            cloud)     _disable_addons "Cloud" "${BLOAT_CLOUD[@]}" ;;
             ai)        _disable_addons "AI/Copilot" "${BLOAT_AI[@]}" ;;
-            daemons)   _disable_binaries ;;
         esac
     done
 
@@ -578,7 +464,7 @@ cmd_restore() {
     header "DeWPS — Restore All Components"
 
     local restored=0
-    local addon_dir original bin_path disabled_path
+    local addon_dir original
 
     for addon_dir in "${ADDONS_DIR}"/*.disabled; do
         if [[ -d "$addon_dir" ]]; then
@@ -593,47 +479,12 @@ cmd_restore() {
         fi
     done
 
-    for binary in "${BLOAT_BINARIES[@]}"; do
-        bin_path="${OFFICE_DIR}/${binary}"
-        disabled_path="${bin_path}.disabled"
-
-        if [[ -f "$disabled_path" ]]; then
-            if [[ -f "$bin_path" ]] && ! grep -q "Disabled by DeWPS" "$bin_path" 2>/dev/null; then
-                # Pacman reinstalled the real binary: drop the stale copy
-                rm -f "$disabled_path"
-            else
-                rm -f "$bin_path"
-                mv "$disabled_path" "$bin_path"
-            fi
-            restored=$((restored + 1))
-        fi
-    done
-
     echo ""
     log_ok "Restored ${restored} components"
     log_info "WPS Office is back to original state"
     echo ""
 }
 
-cmd_kill() {
-    header "DeWPS — Kill WPS Background Processes"
-
-    local killed=0 binary
-
-    for binary in "${BLOAT_BINARIES[@]}"; do
-        _kill_matching "${OFFICE_DIR}/${binary}" "$binary"
-    done
-    _kill_matching "promecefpluginhost" "promecefpluginhost"
-    _kill_matching "${OFFICE_DIR}/wpsoffice.*--server=browser" "wpsoffice browser"
-
-    echo ""
-    if [[ $killed -eq 0 ]]; then
-        log_info "No WPS background processes were running"
-    else
-        log_ok "Killed ${killed} processes total"
-    fi
-    echo ""
-}
 
 cmd_hosts() {
     need_sudo hosts
@@ -712,23 +563,12 @@ cmd_status() {
         hosts_blocked=true
     fi
 
-    local proc_count=0
-    for binary in "${BLOAT_BINARIES[@]}"; do
-        local c
-        c=$(pgrep -cf "${OFFICE_DIR}/${binary}" 2>/dev/null) || c=0
-        proc_count=$((proc_count + c))
-    done
-    local cef_count
-    cef_count=$(pgrep -cf "promecefpluginhost" 2>/dev/null) || cef_count=0
-    proc_count=$((proc_count + cef_count))
-
     echo -e "  ${BOLD}Addons:${RESET}"
     local label arr active disabled
-    for label in Telemetry Ads Cloud AI; do
+    for label in Telemetry Ads AI; do
         case "$label" in
             Telemetry) arr=("${BLOAT_TELEMETRY[@]}") ;;
             Ads)       arr=("${BLOAT_ADS[@]}") ;;
-            Cloud)     arr=("${BLOAT_CLOUD[@]}") ;;
             AI)        arr=("${BLOAT_AI[@]}") ;;
         esac
         read -r active disabled < <(_count_addons "${arr[@]}")
@@ -741,16 +581,6 @@ cmd_status() {
         fi
     done
 
-    local active_bins disabled_bins
-    read -r active_bins disabled_bins < <(_count_binaries)
-    if [[ $active_bins -eq 0 && $disabled_bins -gt 0 ]]; then
-        printf "    %-10s ${GREEN}%3d disabled${RESET}\n" "Daemons:" "$disabled_bins"
-    elif [[ $active_bins -gt 0 ]]; then
-        printf "    %-10s ${RED}%3d active${RESET}, %d disabled\n" "Daemons:" "$active_bins" "$disabled_bins"
-    else
-        printf "    %-10s ${DIM}none found${RESET}\n" "Daemons:"
-    fi
-
     echo -e "  ${BOLD}Telemetry domain blocking:${RESET}"
     if $hosts_blocked; then
         local blocked_count
@@ -760,11 +590,10 @@ cmd_status() {
         echo -e "    ${RED}✗ Not active${RESET} (run: sudo dewps hosts)"
     fi
 
-    echo -e "  ${BOLD}Background processes:${RESET}"
-    if [[ $proc_count -eq 0 ]]; then
-        echo -e "    ${GREEN}✓ None running${RESET}"
-    else
-        echo -e "    ${RED}✗ ${proc_count} processes running${RESET} — run ${CYAN}dewps kill${RESET}"
+    local disabled_mb
+    disabled_mb=$(du -sm "${ADDONS_DIR}"/*.disabled 2>/dev/null | awk '{s+=$1} END {print s+0}')
+    if [[ ${disabled_mb:-0} -gt 0 ]]; then
+        echo -e "  ${BOLD}Space freed:${RESET} ${disabled_mb} MB (disabled addons)"
     fi
 
     echo ""
@@ -781,25 +610,22 @@ cmd_help() {
     echo "    dewps debloat [groups]        Disable addon groups            ${DIM}[sudo]${RESET}"
     echo "    dewps restore                 Restore everything             ${DIM}[sudo]${RESET}"
     echo "    dewps hosts | hosts-remove    Block / unblock domains        ${DIM}[sudo]${RESET}"
-    echo "    dewps kill                    Stop running daemons"
     echo "    dewps status                  Show debloat state"
     echo "    dewps version | help"
     echo ""
     echo -e "${BOLD}DEBLOAT GROUPS:${RESET}"
     echo -e "    ${CYAN}--telemetry${RESET}     Feedback, reporting, config-push SDKs   (18 addons)"
     echo -e "    ${CYAN}--ads${RESET}           Tips, stores, notifications, promos   (18 addons)"
-    echo -e "    ${CYAN}--cloud${RESET}         Cloud drive, docer, share, account      (49 addons)"
     echo -e "    ${CYAN}--ai${RESET}            AI/Copilot features                     (44 addons)"
-    echo -e "    ${CYAN}--daemons${RESET}       Background daemons                      (4 binaries)"
     echo ""
     echo -e "    Without groups, ${CYAN}debloat${RESET} disables all of them."
-    echo -e "    ${DIM}The web shell, embedded browser and runtime infra are never touched"
-    echo -e "    (WPS needs them to boot).${RESET}"
+    echo -e "    ${DIM}Cloud, the web shell/browser and the background daemons are never"
+    echo -e "    touched (WPS needs them to boot).${RESET}"
     echo ""
     echo -e "${BOLD}EXAMPLES:${RESET}"
     echo "    sudo dewps debloat --ads --telemetry --ai    # keep login/cloud"
-    echo "    sudo dewps debloat --cloud --ai              # cloud + AI off"
-    echo "    sudo dewps debloat                           # everything"
+    echo "    sudo dewps debloat --ai                      # AI only"
+    echo "    sudo dewps debloat                           # everything managed"
 }
 
 main() {
@@ -808,7 +634,6 @@ main() {
     case "$cmd" in
         debloat)         shift; cmd_debloat "$@" ;;
         restore)         cmd_restore ;;
-        kill)            cmd_kill ;;
         hosts)           cmd_hosts ;;
         hosts-remove)    cmd_hosts_remove ;;
         status)          cmd_status ;;

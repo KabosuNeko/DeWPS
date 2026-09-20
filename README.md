@@ -1,17 +1,20 @@
 # DeWPS
 
 Debloater for WPS Office CN (`wps-office-cn`) on Arch Linux: disable the addons
-you do not need (telemetry, ads, cloud, embedded browser, AI) and optionally
-block telemetry domains. Everything is reversible: addons are renamed to
-`.disabled`, daemons are replaced with `exit 0` stubs, and `/etc/hosts` has a
-backup and a removal command. Nothing is installed and nothing is written
+you do not need (telemetry, ads, AI) and optionally block telemetry domains.
+Everything is reversible: addons are renamed to `.disabled` and `/etc/hosts` has
+a backup and a removal command. Nothing is installed and nothing is written
 outside `/usr/lib/office6` and `/etc/hosts`.
+
+Cloud, the web shell/browser and the background daemons are **never touched**:
+WPS CN boots into a Prometheus web shell that needs them, and removing any of
+them leaves a blank window or breaks startup. They are excluded from every
+group by design.
 
 ## Run
 
 Pipe straight to bash; nothing is saved. `-s --` forwards the arguments after
-the URL. Local autosave/crash recovery is kept in every profile; only
-login/cloud is given up from profile 2 onward.
+the URL.
 
 **0. Inspect** — read-only, changes nothing:
 
@@ -20,30 +23,29 @@ curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | ba
 ```
 
 **1. Daily (recommended)** — removes ads, tips, stores, tracking and AI; keeps
-login, cloud, sync:
+login, cloud and every local feature:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --ai
 ```
 
-**2. No cloud** — also removes login, WPS Cloud drive/sync, docer and online
-templates; keeps editing, Power Query, local search, local autosave:
+**2. AI only** — just the Copilot/assistant addons:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --cloud --ai
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ai
 ```
 
-**3. Max debloat** — every group:
+**3. Everything managed** — telemetry + ads + AI (same as profile 1 without
+listing groups):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat
 ```
 
-**4. Max + DNS block** — profile 3, then sinkhole 570 telemetry/cloud domains
-(this also makes any remaining online endpoint, including login, unreachable):
+Optional DNS block (also prevents hangs when a WPS promo/CDN endpoint is
+unreachable; it blocks login/cloud domains too):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat
 curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- hosts
 ```
 
@@ -60,41 +62,31 @@ your profile (package updates restore files, not your `/etc/hosts`).
 
 ## Groups
 
-Fine-grained alternative to the profiles:
-
 | Group | Addons | What it covers |
 | :--- | ---: | :--- |
 | `--telemetry` | 18 | Feedback, reporting, config-push and tracking SDKs (`kfeedback`, `kdcsdk`, `kdomainservice`, `kentrycontrol`, `kapmsdk`) |
 | `--ads` | 18 | Tips, notifications, message/push SDKs, stores (`kskincenter`, `kmulticatalog`), VIP promos |
-| `--cloud` | 49 | Cloud drive, docer/KDocs, sharing, account (`qing`, `yunbox`, `kclouddocs`, `knewdocs`, `knewshare`, `kdocer*`), online fonts, OCR/translate/help panels |
 | `--ai` | 44 | AI/Copilot features (writing, formula, PDF AI, spreadsheet AI, translation/OCR AI) |
-| `--daemons` | 4 | Background binaries (`wpscloudsvr`, `wpslingxi`, `wpsd`, `KPacketInstall`) |
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --ai
-```
+`debloat` without groups disables all of them. Addons never touched: cloud
+drive/login (`qing`, `yunbox`, `kclouddocs`, `kdocer*`), the web shell and
+browser (`cef`, `kcef`, `kstartpage`, `kpromewebapp`, `kpluginconfigcenter`),
+and the background daemons (`wpscloudsvr`, `wpslingxi`, `wpsd`,
+`KPacketInstall`).
 
-`debloat` without groups disables all of them.
-
-The web shell, embedded browser and runtime infrastructure (`kstartpage`,
-`kpromewebapp`, `cef`, `kpluginconfigcenter`, `knetwork`, `kccsdk`, plugin
-manager...) are **never touched**: WPS CN boots into that shell, and removing it
-leaves a blank window. They are not part of any group.
-
-Local features are never touched: editing/reading Writer/Spreadsheets/Presentation/PDF, open/save of
-`docx`/`xlsx`/`pptx`/`pdf`/`ofd`, printing, formulas, charts, Power Query, local
-search index, barcode/QR tools.
+Local features are never touched: editing/reading Writer/Spreadsheets/
+Presentation/PDF, open/save of `docx`/`xlsx`/`pptx`/`pdf`/`ofd`, printing,
+formulas, charts, Power Query, local search index, barcode/QR tools.
 
 ## Commands
 
 | Command | Privilege | Effect (and what it writes) |
 | :--- | :---: | :--- |
-| `debloat [--telemetry --ads --cloud --ai --daemons]` | sudo | Rename the selected groups to `.disabled` and stub daemons. All groups when no flag is given |
-| `restore` | sudo | Restore addons/binaries to factory state |
+| `debloat [--telemetry --ads --ai]` | sudo | Rename the selected groups to `.disabled`. All groups when no flag is given |
+| `restore` | sudo | Restore all disabled addons to factory state |
 | `hosts` | sudo | Block 570 telemetry/cloud domains in `/etc/hosts` (also blocks login/cloud); backup at `/etc/hosts.dewps-backup` |
 | `hosts-remove` | sudo | Remove the `/etc/hosts` block |
-| `kill` | user | Terminate running daemons and CEF processes |
-| `status` | user | Per-group active/disabled counts, hosts state, running processes |
+| `status` | user | Per-group active/disabled counts, hosts state |
 | `version`, `help` | user | Version, usage |
 
 The DNS block also prevents hangs: when a WPS promo/CDN endpoint is unreachable,
@@ -106,8 +98,9 @@ endpoints are reachable.
 
 - `/etc/hosts` is bypassed by DoH, proxies, or hardcoded IPs.
 - Group classification is static; vendor renames require updates.
-- This is not a privacy/security sandbox. If you need process isolation or
-  credential masking, use an open-source office suite instead.
+- This is not a privacy/security sandbox, and it deliberately keeps the cloud
+  and daemon stack. If you need process isolation or credential masking, use an
+  open-source office suite instead.
 - Tested on Arch/CachyOS with `wps-office-cn` 12.1.2.28080-1. Use at your own
   risk.
 

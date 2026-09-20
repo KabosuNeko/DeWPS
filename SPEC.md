@@ -2,16 +2,14 @@
 
 ## Problem
 
-`wps-office-cn` ships telemetry, ads, cloud services, an embedded browser, AI
-addons, a remote addon loader, and background daemons that most users never
-need. Removing package files would break pacman, and manual debloat recipes are
-not reversible and do not survive package updates. Measured details are in
-`AGENTS.md`.
+`wps-office-cn` ships telemetry, ads, and AI addons that most users never need,
+plus a cloud/shell stack. Removing package files would break pacman, and manual
+debloat recipes are not reversible. Measured details are in `AGENTS.md`.
 
 ## Users
 
 - Arch Linux / CachyOS users of `wps-office-cn` who keep WPS for MS Office
-  format compatibility but want unnecessary features gone.
+  format compatibility but want telemetry, ads and AI gone.
 - Maintainers extending the addon classification.
 
 Constraints: `sudo` available, no files installed outside the package manager,
@@ -19,29 +17,25 @@ system package management must keep working.
 
 ## Required behavior
 
-1. `debloat` accepts group flags `--telemetry`, `--ads`, `--cloud`, `--ai`,
-   `--daemons`; with no flags it selects every group. Each addon group
-   is renamed to `<name>.disabled`; `--daemons` replaces the four background
-   binaries with `exit 0` stubs, keeping originals at `<binary>.disabled`.
+1. `debloat` accepts group flags `--telemetry`, `--ads`, `--ai`; with no flags
+   it selects every group. Selected addon directories are renamed to
+   `<name>.disabled`.
 2. Unknown group flags fail with a usage message before changing anything.
-3. `restore` returns addons and binaries to factory state, including after a
-   pacman upgrade reinstalled original paths.
+3. `restore` returns addons to factory state, including after a pacman upgrade
+   reinstalled original paths.
 4. `hosts` writes unique `0.0.0.0 <domain>` entries (curated list +
    `kblockhost.ini`) between two markers in `/etc/hosts`; `hosts-remove` removes
    exactly that block.
-5. `kill` terminates matching daemon and CEF processes with SIGTERM.
-6. `status` is read-only and reports per-group active/disabled counts, hosts
-   state, and running processes.
+5. `status` is read-only and reports per-group active/disabled counts and hosts
+   state.
 
 Error, empty, and recovery behavior:
 
 - WPS missing or missing root → clear error, exit 1.
-- "Nothing to do" cases (hosts already blocked, nothing to kill) → exit 0 with a
-  message.
+- "Nothing to do" cases (hosts already blocked) → exit 0 with a message.
 - Repeated runs are idempotent. A pacman reinstall must never produce nested
-  structures (for example `cef.disabled/cef`) or restore stale versions.
-- Local-only daemons (`wpsquery` = Power Query, `EverythingDaemon` = search
-  index) are never disabled.
+  structures (for example `kfeedback.disabled/kfeedback`) or restore stale
+  versions.
 
 ## User experience
 
@@ -55,23 +49,25 @@ Error, empty, and recovery behavior:
 
 ## Architecture and data flow
 
-- One bash script, `dewps.sh`: constants, group lists, helpers, `cmd_*`
-  functions, `main` dispatch. Regression tests in `tests/`.
-- State lives in the filesystem: `.disabled` renames, the `Disabled by DeWPS`
-  stub marker, `/etc/hosts` markers, backup file. Nothing is written to the home
-  directory.
-- Groups: `BLOAT_TELEMETRY` (18), `BLOAT_ADS` (18), `BLOAT_CLOUD` (49),
-  `BLOAT_AI` (44), `BLOAT_BINARIES` (4). The web shell, embedded browser and
-  runtime infrastructure (`kstartpage`, `kpromewebapp`, `cef`, `kcef`,
-  `kpluginconfigcenter`, `kccsdk`, `knetwork`, `kapplist`, `kappmgr`, plugin
-  manager...) are deliberately excluded from every group: WPS CN boots into that
-  shell, and removing it leaves a blank window or breaks service startup.
-- External interfaces: `/usr/lib/office6`, `/etc/hosts`, `pgrep`/`ps`, `pacman`.
+- One bash script, `dewps.sh`: constants, three group lists
+  (`BLOAT_TELEMETRY` 18, `BLOAT_ADS` 18, `BLOAT_AI` 44), helpers, `cmd_*`,
+  `main`. Regression tests in `tests/`.
+- State lives in the filesystem: `.disabled` renames, `/etc/hosts` markers,
+  backup file. Nothing is written to the home directory.
+- Deliberately excluded from every group (boot-required in the default
+  Prometheus shell): the cloud/login addons (`qing`, `kdocer*`, `kclouddocs`...),
+  the web shell and browser (`cef`, `kcef`, `kstartpage`, `kpromewebapp`,
+  `kpluginconfigcenter`, `kccsdk`, `knetwork`, plugin manager, `kapplist`,
+  `kappmgr`) and the background daemons (`wpscloudsvr`, `wpslingxi`, `wpsd`,
+  `KPacketInstall`). User testing showed WPS hangs or opens a blank window when
+  any of them is missing.
+- External interfaces: `/usr/lib/office6`, `/etc/hosts`, `pacman`.
 - Privilege flow: `sudo` for system paths; nothing else is touched.
 
 ## Security and privacy
 
-- Scope: debloat only. `hosts` blocks known telemetry/cloud domains.
+- Scope: debloat ads/telemetry/AI addons; `hosts` blocks known
+  telemetry/cloud domains.
 - Guarantees: no deletion of files under `/usr/lib/office6`; every action has an
   inverse (`restore`, `hosts-remove`, backup file).
 - Non-guarantees: WPS still runs with user privileges and can read the home
@@ -83,7 +79,7 @@ Error, empty, and recovery behavior:
 
 - Target: Arch Linux/CachyOS, `wps-office-cn` 12.1.2.28080-1 (reference),
   Linux 6.13+, Wayland/X11.
-- Runtime deps: bash >= 4.2 (5.x tested), coreutils, grep, sed, awk, procps-ng,
+- Runtime deps: bash >= 4.2 (5.x tested), coreutils, grep, sed, awk,
   `pacman`. No `bc`, no Python, no network access from the script.
 - Must not break pacman: no package files removed, no ownership changes under
   `/usr/lib`, no pacman hook.
@@ -92,6 +88,8 @@ Error, empty, and recovery behavior:
 
 - No privacy hardening of user data (`Office.conf`, tracking databases, device
   ID), no sandbox, no wrappers, no pacman hook.
+- No disabling of the cloud stack, web shell/browser, or background daemons:
+  WPS CN needs them to boot in its default mode.
 - No support for non-CN WPS packages or installs outside `/usr/lib/office6`.
 - No GUI, no self-update, no patching of WPS binaries, no touching user
   documents.
