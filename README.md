@@ -29,8 +29,9 @@ files, not your `/etc/hosts`).
 
 ## Profiles
 
-Local autosave/crash recovery is kept in every profile; only login/cloud is
-given up from profile 2 onward.
+Set `RAW` once per shell (see [Run](#run)); every command below then works as a
+copy-paste. Local autosave/crash recovery is kept in every profile; only
+login/cloud is given up from profile 2 onward.
 
 **0. Inspect** — read-only, changes nothing:
 
@@ -99,24 +100,15 @@ search index, barcode/QR tools.
 
 ## Commands
 
-| Command | Privilege | Effect |
+| Command | Privilege | Effect (and what it writes) |
 | :--- | :---: | :--- |
-| `debloat [--telemetry --ads --cloud --cef --ai --daemons]` | sudo | Disable the selected groups (all when none given) |
+| `debloat [--telemetry --ads --cloud --cef --ai --daemons]` | sudo | Rename the selected groups to `.disabled`, stub daemons; audit log in `~/.config/dewps`. All groups when no flag is given |
 | `restore` | sudo | Restore addons/binaries to factory state |
-| `hosts`, `hosts-remove` | sudo | Block/remove 570 telemetry/cloud domains in `/etc/hosts` |
+| `hosts` | sudo | Block 570 telemetry/cloud domains in `/etc/hosts` (also blocks login/cloud); backup at `/etc/hosts.dewps-backup` |
+| `hosts-remove` | sudo | Remove the `/etc/hosts` block |
 | `kill` | user | Terminate running daemons and CEF processes |
 | `status` | user | Per-group active/disabled counts, hosts state, running processes |
 | `version`, `help` | user | Version, usage |
-
-`hosts` is optional and separate. It blocks login/cloud domains too, so use it
-only if you do not need WPS online features.
-
-## Files touched
-
-| Command | Writes |
-| :--- | :--- |
-| `debloat` | renames/stubs under `/usr/lib/office6`; audit log in `~/.config/dewps` |
-| `hosts` | `/etc/hosts` block (+ `/etc/hosts.dewps-backup`) |
 
 ## Limitations
 
