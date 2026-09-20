@@ -89,8 +89,7 @@ hook by design: re-run `debloat` after a WPS update.
 ## Commands
 
 ```bash
-# No build step. Run from the repo, a download, or piped:
-RAW=https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
+# No build step. Run from the repo, a download, or piped (see README).
 
 # Static analysis
 bash -n dewps.sh
@@ -106,10 +105,10 @@ shellcheck -S style dewps.sh tests/*.sh
 ./dewps.sh status
 
 # System-changing (requires explicit approval)
-curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --ai   # daily profile
-curl -fsSL "$RAW" | sudo bash -s -- debloat                          # all groups
-curl -fsSL "$RAW" | sudo bash -s -- hosts
-# Local development uses ./dewps.sh instead of curl.
+sudo ./dewps.sh debloat --ads --telemetry --ai   # daily profile
+sudo ./dewps.sh debloat                          # all groups
+sudo ./dewps.sh hosts
+# Piped form: curl -fsSL <url> | sudo bash -s -- debloat --ads --telemetry --ai
 ```
 
 ## Validation

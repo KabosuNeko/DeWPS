@@ -9,62 +9,55 @@ outside `/usr/lib/office6` and `/etc/hosts`.
 
 ## Run
 
-Pipe the script straight to bash; nothing is saved. `-s --` forwards the
-arguments after the URL. Set `RAW` once per shell, then any profile below is a
-copy-paste:
-
-```bash
-RAW=https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh
-```
-
-Local autosave/crash recovery is kept in every profile; only login/cloud is
-given up from profile 2 onward.
+Pipe straight to bash; nothing is saved. `-s --` forwards the arguments after
+the URL. Local autosave/crash recovery is kept in every profile; only
+login/cloud is given up from profile 2 onward.
 
 **0. Inspect** — read-only, changes nothing:
 
 ```bash
-curl -fsSL "$RAW" | bash -s -- status
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | bash -s -- status
 ```
 
 **1. Daily (recommended)** — removes ads, tips, stores, tracking and AI; keeps
 login, cloud, sync:
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --ai
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --ai
 ```
 
 **2. No cloud** — also removes login, WPS Cloud drive/sync, docer and online
 templates; keeps editing, Power Query, local search, local autosave:
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --telemetry --cloud --ai
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --telemetry --cloud --ai
 ```
 
 **3. Max addon debloat** — all groups, including the embedded browser/web
 panels (`--cef`) and the background daemons:
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- debloat
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat
 ```
 
 **4. Max + DNS block** — profile 3, then sinkhole 570 telemetry/cloud domains
 (this also makes any remaining online endpoint, including login, unreachable):
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- debloat
-curl -fsSL "$RAW" | sudo bash -s -- hosts
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- hosts
 ```
 
 Revert at any point:
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- restore
-curl -fsSL "$RAW" | sudo bash -s -- hosts-remove
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- restore
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- hosts-remove
 ```
 
-Pin a commit SHA instead of `main` for reproducible code. Prefer a file?
-`curl -fsSLO "$RAW" && chmod +x dewps.sh`. After each WPS package update,
-re-run your profile (package updates restore files, not your `/etc/hosts`).
+Replace `main` with a commit SHA for reproducible code. Prefer a file?
+`curl -fsSLO <url> && chmod +x dewps.sh`. After each WPS package update, re-run
+your profile (package updates restore files, not your `/etc/hosts`).
 
 ## Groups
 
@@ -80,7 +73,7 @@ Fine-grained alternative to the profiles:
 | `--daemons` | 4 | Background binaries (`wpscloudsvr`, `wpslingxi`, `wpsd`, `KPacketInstall`) |
 
 ```bash
-curl -fsSL "$RAW" | sudo bash -s -- debloat --ads --ai
+curl -fsSL https://raw.githubusercontent.com/KabosuNeko/DeWPS/main/dewps.sh | sudo bash -s -- debloat --ads --ai
 ```
 
 `debloat` without groups disables everything. Local features are never touched:
