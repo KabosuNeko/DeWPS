@@ -4,16 +4,6 @@
 
 Phase 3: Scope cut and docs.
 
-- [ ] Commit the pending project state.
-  - Scope: untracked files (`dewps.sh`, `README.md`, `SPEC.md`, `ROADMAP.md`,
-    `TASKS.md`, `AGENTS.md`, `tests/`) in separate commits for the group split,
-    tests, and docs.
-  - Acceptance criteria: `git status --short` empty after committing; no
-    credentials, machine-specific paths, or runtime artifacts committed.
-  - Automated validation: `git status --short` empty; tests re-run on the
-    committed tree.
-  - Manual validation: read the staged diff.
-  - Dependencies or blockers: user approval to commit and push.
 - [ ] Verify `debloat` on the reference machine.
   - Scope: close WPS, run `sudo ./dewps.sh debloat --ads --telemetry --ai`,
     check `./dewps.sh status`, then `sudo ./dewps.sh restore` if a rollback is
@@ -28,6 +18,10 @@ Phase 3: Scope cut and docs.
 
 ## Completed
 
+- [x] Commit the project state.
+  - Validation: three commits on `main` (`feat` tool, `test` suite, `docs`);
+    `git status --short` clean; tests re-run on the committed tree. Not pushed
+    yet.
 - [x] Split debloat into selectable groups.
   - Validation: `--telemetry` (20), `--ads` (28), `--cloud` (60), `--cef` (6),
     `--ai` (44), `--daemons` (4); no flags means all groups; unknown flags abort
