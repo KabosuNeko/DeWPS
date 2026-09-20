@@ -78,8 +78,8 @@ check "restore-after-update: stale copy removed" no "$( [[ -e $OFFICE_DIR/wpsd.d
 
 # --- group selection ---
 rm -rf "$ADDONS_DIR"
-mkdir -p "$ADDONS_DIR"/{kfeedback,kskincenter,kccsdk,cef,kwpscopilot}
-for n in kfeedback kskincenter kccsdk cef kwpscopilot; do echo x > "$ADDONS_DIR/$n/f"; done
+mkdir -p "$ADDONS_DIR"/{kfeedback,kskincenter,kccsdk,cef,kstartpage,kwpscopilot}
+for n in kfeedback kskincenter kccsdk cef kstartpage kwpscopilot; do echo x > "$ADDONS_DIR/$n/f"; done
 echo real-daemon > "$OFFICE_DIR/wpscloudsvr"
 
 cmd_debloat --ads --ai >/dev/null
@@ -88,6 +88,7 @@ check "group: ai disabled"        yes "$( [[ -d $ADDONS_DIR/kwpscopilot.disabled
 check "group: telemetry kept"     no  "$( [[ -e $ADDONS_DIR/kfeedback.disabled ]] && echo yes || echo no )"
 check "group: cloud kept"         no  "$( [[ -e $ADDONS_DIR/kccsdk.disabled ]] && echo yes || echo no )"
 check "group: cef kept"           no  "$( [[ -e $ADDONS_DIR/cef.disabled ]] && echo yes || echo no )"
+check "group: shell kept"         no  "$( [[ -e $ADDONS_DIR/kstartpage.disabled ]] && echo yes || echo no )"
 check "group: daemons kept"       real-daemon "$(cat "$OFFICE_DIR/wpscloudsvr")"
 
 cmd_debloat --telemetry --daemons >/dev/null

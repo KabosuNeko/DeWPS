@@ -49,11 +49,9 @@ BLOAT_TELEMETRY=(
     kapmsdk
     kfpccomb
     kwebeditioninfo
-    kwebdashboard
 )
 
 BLOAT_ADS=(
-    kstartpage
     ktoast
     kwhatsnew
     ktipsmanager
@@ -66,15 +64,6 @@ BLOAT_ADS=(
     khoneycomb
     kspostpay
     kappcenter
-    kpromechuangkit
-    kpromeprocesson
-    kpromeprocessonlocal
-    kprometheusjsapi
-    kpromewebapp
-    kpromewebappruninfo
-    kpromeworkarea
-    kwebintegratedpanel
-    kwebextensionlist
     kskincenter
     kmultcatalog
     kwpsofficial
@@ -90,6 +79,17 @@ BLOAT_CEF=(
     kpromebrowser
     v8
     kfecommonresource
+    kstartpage
+    kpromechuangkit
+    kpromeprocesson
+    kpromeprocessonlocal
+    kprometheusjsapi
+    kpromewebapp
+    kpromewebappruninfo
+    kpromeworkarea
+    kwebintegratedpanel
+    kwebextensionlist
+    kwebdashboard
 )
 
 BLOAT_CLOUD=(
@@ -819,14 +819,16 @@ cmd_help() {
     echo "    dewps version | help"
     echo ""
     echo -e "${BOLD}DEBLOAT GROUPS:${RESET}"
-    echo -e "    ${CYAN}--telemetry${RESET}     Feedback, reporting, config-push SDKs   (20 addons)"
-    echo -e "    ${CYAN}--ads${RESET}           Start page, stores, notifications       (28 addons)"
+    echo -e "    ${CYAN}--telemetry${RESET}     Feedback, reporting, config-push SDKs   (19 addons)"
+    echo -e "    ${CYAN}--ads${RESET}           Tips, stores, notifications, promos   (18 addons)"
     echo -e "    ${CYAN}--cloud${RESET}         Cloud drive, docer, share, account      (60 addons)"
-    echo -e "    ${CYAN}--cef${RESET}           Embedded browser / webview engine       (6 addons)"
+    echo -e "    ${CYAN}--cef${RESET}           Prometheus web shell + browser          (17 addons)"
     echo -e "    ${CYAN}--ai${RESET}            AI/Copilot features                     (44 addons)"
     echo -e "    ${CYAN}--daemons${RESET}       Background daemons                      (4 binaries)"
     echo ""
     echo -e "    Without groups, ${CYAN}debloat${RESET} disables all of them."
+    echo -e "    ${YELLOW}--cef can leave a blank window${RESET} unless AppComponentMode=prome_independ"
+    echo -e "    is set in ~/.config/Kingsoft/Office.conf."
     echo ""
     echo -e "${BOLD}EXAMPLES:${RESET}"
     echo "    sudo dewps debloat --ads --telemetry --ai    # nothing useful lost"

@@ -18,12 +18,18 @@ Phase 3: Scope cut and docs.
 
 ## Completed
 
+- [x] Fix the shell misclassification found in daily use.
+  - Validation: `kstartpage`, `kpromewebapp*`, `kpromeworkarea`, hub panels and
+    `kwebdashboard` moved from `--ads`/`--telemetry` to `--cef`; the daily
+    profile no longer removes the Prometheus shell; help and README warn that
+    `--cef` requires native mode; group selection test keeps a shell addon when
+    only `--ads --ai` are selected.
 - [x] Commit the project state.
   - Validation: three commits on `main` (`feat` tool, `test` suite, `docs`);
     `git status --short` clean; tests re-run on the committed tree. Not pushed
     yet.
 - [x] Split debloat into selectable groups.
-  - Validation: `--telemetry` (20), `--ads` (28), `--cloud` (60), `--cef` (6),
+  - Validation: `--telemetry` (19), `--ads` (18), `--cloud` (60), `--cef` (17),
     `--ai` (44), `--daemons` (4); no flags means all groups; unknown flags abort
     before changes; group selection covered by the debloat cycle test.
 - [x] Cut the tool down to debloat only.

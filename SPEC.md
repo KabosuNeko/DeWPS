@@ -60,8 +60,11 @@ Error, empty, and recovery behavior:
 - State lives in the filesystem: `.disabled` renames, the `Disabled by DeWPS`
   stub marker, `/etc/hosts` markers, backup file. Nothing is written to the home
   directory.
-- Groups: `BLOAT_TELEMETRY` (20), `BLOAT_ADS` (28), `BLOAT_CLOUD` (60),
-  `BLOAT_CEF` (6), `BLOAT_AI` (44), `BLOAT_BINARIES` (4).
+- Groups: `BLOAT_TELEMETRY` (19), `BLOAT_ADS` (18), `BLOAT_CLOUD` (60),
+  `BLOAT_CEF` (17), `BLOAT_AI` (44), `BLOAT_BINARIES` (4).
+- `--cef` covers the Prometheus web shell and embedded browser; disabling it can
+  leave a blank window unless native mode is configured. `--cef` is not part of
+  the safe max profile.
 - External interfaces: `/usr/lib/office6`, `/etc/hosts`, `pgrep`/`ps`, `pacman`.
 - Privilege flow: `sudo` for system paths; nothing else is touched.
 

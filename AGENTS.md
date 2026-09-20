@@ -30,7 +30,7 @@ Measured on `wps-office-cn` 12.1.2.28080-1:
 ## Architecture
 
 - `dewps.sh` — the whole tool: constants, the six group lists
-  (`BLOAT_TELEMETRY` 20, `BLOAT_ADS` 28, `BLOAT_CLOUD` 60, `BLOAT_CEF` 6,
+  (`BLOAT_TELEMETRY` 19, `BLOAT_ADS` 18, `BLOAT_CLOUD` 60, `BLOAT_CEF` 17,
   `BLOAT_AI` 44, `BLOAT_BINARIES` 4), helpers, `cmd_*`, `main`. Command table in
   `README.md`, required behavior in `SPEC.md`.
 - `tests/` — hermetic regression scripts: `test_debloat_cycle.sh`,
